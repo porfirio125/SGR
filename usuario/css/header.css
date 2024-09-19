@@ -1,0 +1,110 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    display: flex;
+    padding-top: 70px; /* Espacio para el header fijo */
+}
+.header {
+    background-color: #e60a0a;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 9999;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+.header .logo img {
+    height: 50px;
+    transition: transform 0.3s ease;
+}
+.header .logo:hover img {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+.header .phrases {
+    text-align: right;
+    margin-right: 50px;
+}
+.header .phrases p {
+    margin: 0;
+    line-height: 1.5;
+}
+.sidebar {
+    width: 250px;
+    background-color: #e60d0d;
+    color: white;
+    padding: 15px;
+    box-sizing: border-box;
+    top: 70px; /* Colocar debajo del header */
+    left: 0;
+    border-radius: 20px;
+    margin-bottom: auto;
+
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    display: flex; /* Cambiado a flex para centrar */
+    justify-content: center; /* Centrar horizontalmente */
+    padding: 10px 0;
+}
+.sidebar a:hover {
+    background-color: #575757;
+}
+.content {
+    margin-left: 250px; /* Espacio para la barra lateral */
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #f4f4f4;
+    min-height: calc(100vh - 70px);
+    box-sizing: border-box;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid #ddd;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+th {
+    background-color: #333;
+    color: white;
+}
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+    .content {
+        margin-left: 200px;
+    }
+}
+@media (max-width: 600px) {
+    body {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: 0;
+    }
+    .content {
+        margin-left: 0;
+        padding-top: 20px;
+    }
+}
+h2 {
+    display: flex; /* Cambiado a flex para centrar */
+    justify-content: center; /* Centrar horizontalmente */
+}
+

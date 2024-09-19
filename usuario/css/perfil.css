@@ -1,0 +1,29 @@
+.perfil-container {
+    background-color: red; /* Cambiado a rojo */
+    border: none; /* Sin borde */
+    border-radius: 5px;
+    padding: 20px;
+    margin: 0; /* Sin margen para centrar */
+    box-shadow: none; /* Sin sombra */
+    position: fixed; /* Posición fija */
+    top: 50%; /* Centrado verticalmente */
+    left: 50%; /* Centrado horizontalmente */
+    transform: translate(-50%, -50%); /* Ajuste para centrar */
+    width: 80%; /* Ancho del recuadro */
+    max-width: 600px; /* Ancho máximo */
+}
+
+.perfil-container h1 {
+    font-size: 24px;
+    color: #fff; /* Color del texto cambiado a blanco */
+}
+
+.perfil-container p {
+    font-size: 18px;
+    color: #fff; /* Color del texto cambiado a blanco */
+}
+
+.perfil-container strong {
+    color: #fff; /* Color del texto cambiado a blanco */
+}
+
