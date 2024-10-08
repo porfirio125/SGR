@@ -21,8 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
 
-        // Verifica la contraseña
-        if ($contrasena_input == $row["contrasena"]) {
+        // Verifica la contraseña usando password_verify
+        if (password_verify($contrasena_input, $row["contrasena"])) {
             // Credenciales correctas, guardar datos del usuario en la sesión
             $_SESSION["id_usuario"] = $row["id_usuario"];  // Asignar id_usuario a la sesión
             $_SESSION["correo"] = $correo;

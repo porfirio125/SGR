@@ -3,69 +3,79 @@ require '../conexion/conexion.php';
 session_start(); 
 
 include 'header.php';
+
 // Obtener la lista de tipos de requerimiento
 $sql_tipos = "SELECT id_tipo_requerimiento, nombre_tipo FROM tipos_requerimiento";
 $result_tipos = $conn->query($sql_tipos);
 
 // Verificar si el formulario ha sido enviado
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $id_usuario = $_SESSION['id_usuario']; // Obteniendo el ID del usuario de la sesión
+    // Obtener datos del formulario
+    $id_usuario = $_SESSION['id_usuario']; // Obtenido desde la sesión
     $id_oficina = $_POST['id_oficina'];
     $id_tipo_requerimiento = $_POST['id_tipo_requerimiento'];
     $fecha_creacion = $_POST['fecha_creacion'];
     $descripcion = $_POST['descripcion'];
     $estado = $_POST['estado'];
 
-    // Obtener automáticamente el flujo basado en el tipo de requerimiento y la oficina
-    $sql_flujo = "SELECT id_flujo FROM flujo_oficinas 
-                  WHERE id_tipo_requerimiento = ? AND id_oficina = ? 
-                  ORDER BY orden ASC LIMIT 1";
-    $stmt_flujo = $conn->prepare($sql_flujo);
-    $stmt_flujo->bind_param('ii', $id_tipo_requerimiento, $id_oficina);
-    $stmt_flujo->execute();
-    $result_flujo = $stmt_flujo->get_result();
-    $row_flujo = $result_flujo->fetch_assoc();
-    $id_flujo = $row_flujo['id_flujo'];
+    // Iniciar la transacción
+    $conn->begin_transaction();
 
-    // Insertar los datos en la tabla 'requerimientos'
-    $sql_insert = "INSERT INTO requerimientos (id_usuario, id_oficina, id_tipo_requerimiento, fecha_creacion, descripcion, estado, id_flujo) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql_insert);
-    $stmt->bind_param('iiisssi', $id_usuario, $id_oficina, $id_tipo_requerimiento, $fecha_creacion, $descripcion, $estado, $id_flujo);
+    try {
+        // Obtener automáticamente el flujo basado en el tipo de requerimiento y la oficina
+        $sql_flujo = "SELECT id_flujo FROM flujo_oficinas 
+                      WHERE id_tipo_requerimiento = ? AND id_oficina = ? 
+                      ORDER BY orden ASC LIMIT 1";
+        $stmt_flujo = $conn->prepare($sql_flujo);
+        $stmt_flujo->bind_param('ii', $id_tipo_requerimiento, $id_oficina);
+        $stmt_flujo->execute();
+        $result_flujo = $stmt_flujo->get_result();
+        $row_flujo = $result_flujo->fetch_assoc();
+        $id_flujo = $row_flujo['id_flujo'];
 
-    if ($stmt->execute()) {
-        echo "Requerimiento enviado exitosamente.<br>";
+        // Insertar en la tabla 'requerimientos'
+        $sql_insert_requerimiento = "INSERT INTO requerimientos 
+            (id_usuario, id_oficina, id_tipo_requerimiento, fecha_creacion, descripcion, estado, id_flujo) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt_requerimiento = $conn->prepare($sql_insert_requerimiento);
+        $stmt_requerimiento->bind_param('iiisssi', $id_usuario, $id_oficina, $id_tipo_requerimiento, $fecha_creacion, $descripcion, $estado, $id_flujo);
+        $stmt_requerimiento->execute();
 
-        // Obtener el ID del requerimiento recién creado
+        // Obtener el ID del requerimiento insertado
         $id_requerimiento = $conn->insert_id;
-        echo "ID del requerimiento creado: " . $id_requerimiento . "<br>";
 
         // Insertar en la tabla 'historial_requerimientos'
         $fecha_revision = date('Y-m-d H:i:s'); // Fecha actual
         $comentario = "Requerimiento creado"; // Comentario inicial
 
-        // Debug: Ver el SQL generado
-        $sql_historial_insert = "INSERT INTO historial_requerimientos (id_requerimiento, id_usuario, id_oficina, fecha_revision, comentario, estado, id_flujo) 
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt_historial = $conn->prepare($sql_historial_insert);
-        $stmt_historial->bind_param('iiisssii', $id_requerimiento, $id_usuario, $id_oficina, $fecha_revision, $comentario, $estado, $id_flujo);
+        $sql_insert_historial = "INSERT INTO historial_requerimientos 
+            (id_requerimiento, id_usuario, id_oficina, fecha_revision, comentario, estado, id_flujo, id_tipo_requermiento) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt_historial = $conn->prepare($sql_insert_historial);
+        $stmt_historial->bind_param('iiisssii', $id_requerimiento, $id_usuario, $id_oficina, $fecha_revision, $comentario, $estado, $id_flujo, $id_tipo_requerimiento);
+        $stmt_historial->execute();
 
-        // Verificar la ejecución e imprimir el error si ocurre
-        if ($stmt_historial->execute()) {
-            echo "Historial insertado exitosamente.<br>";
-        } else {
-            echo "Error al insertar en historial: " . $stmt_historial->error . "<br>";
-        }
-        $stmt_historial->close();
-    } else {
-        echo "Error al insertar en requerimientos: " . $stmt->error . "<br>";
+        // Confirmar la transacción
+        $conn->commit();
+
+        echo "Requerimiento y su historial insertados correctamente.";
+
+    } catch (Exception $e) {
+        // En caso de error, deshacer los cambios
+        $conn->rollback();
+        echo "Error al insertar los datos: " . $e->getMessage();
     }
+
+    // Cerrar las declaraciones
     $stmt_flujo->close();
-    $stmt->close();
+    $stmt_requerimiento->close();
+    $stmt_historial->close();
 }
-include 'footer.php'
+
+include 'footer.php';
 ?>
 
+<!-- Formulario HTML -->
 <form method="post">
     <input type="hidden" id="id_usuario" name="id_usuario" value="<?php echo $_SESSION['id_usuario']; ?>" required>
 
@@ -105,7 +115,4 @@ include 'footer.php'
     <input type="text" id="estado" name="estado" required><br>
 
     <input type="submit" value="Enviar Requerimiento">
-
-
-
 </form>
