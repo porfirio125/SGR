@@ -48,7 +48,7 @@
     <div class="header">
         <div class="logo">
             <a href="index.php">
-                <img src="../escudo.png" alt="Logo del sistema">
+                <img src="../img/escudo.png" alt="Logo del sistema">
             </a>
         </div>
         <div class="sidebar">
