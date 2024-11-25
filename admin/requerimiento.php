@@ -43,7 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Insertar en la tabla 'requerimientos'
         //Se corrige la consulta para incluir la columna id_oficina_derivar si existe en la tabla requerimientos
         $sql_insert_requerimiento = "INSERT INTO requerimientos (id_usuario, id_oficina, id_tipo_requerimiento, id_tipo_documento, fecha_creacion, descripcion, estado) VALUES (?, ?, ?, ?, ?, ?, ?)"; //Added id_oficina_derivar to the query
-        $stmt_requerimiento = $conn->prepare($sql_insert_requerimiento);
+        
+        /*$stmt_requerimiento = $conn->prepare($sql_insert_requerimiento);
         if (!$stmt_requerimiento) {
             throw new Exception("Error al preparar la consulta de inserción de requerimientos: " . $conn->error);
         }
@@ -51,7 +52,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt_requerimiento->execute();
         if (!$stmt_requerimiento->execute()) {
             throw new Exception("Error al ejecutar la consulta de inserción de requerimientos: " . $stmt_requerimiento->error);
+        }*/
+
+        $stmt_requerimiento = $conn->prepare($sql_insert_requerimiento);
+        if (!$stmt_requerimiento) {
+            throw new Exception("Error al preparar la consulta de inserción de requerimientos: " . $conn->error);
         }
+        $stmt_requerimiento->bind_param('iiisssi', $id_usuario, $id_oficina, $id_tipo_requerimiento, $id_tipo_documento, $fecha_creacion, $descripcion, $estado);
+        $stmt_requerimiento->execute();
+
+        if (!$stmt_requerimiento) {
+        throw new Exception("Error al ejecutar la consulta de inserción de requerimientos: " . $stmt_requerimiento->error);
+        }   
+
 
         // Obtener el ID del requerimiento insertado
         $id_requerimiento = $conn->insert_id;

@@ -49,9 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $stmt_requerimiento->bind_param('iiisssi', $id_usuario, $id_oficina, $id_tipo_requerimiento, $id_tipo_documento, $fecha_creacion, $descripcion, $estado); //Added $id_oficina_derivar to bind_param
         $stmt_requerimiento->execute();
-        if (!$stmt_requerimiento->execute()) {
+        
+        /*if (!$stmt_requerimiento->execute()) {
             throw new Exception("Error al ejecutar la consulta de inserción de requerimientos: " . $stmt_requerimiento->error);
-        }
+        }*/
+        if (!$stmt_requerimiento) {
+            throw new Exception("Error al ejecutar la consulta de inserción de requerimientos: " . $stmt_requerimiento->error);
+            }  
 
         // Obtener el ID del requerimiento insertado
         $id_requerimiento = $conn->insert_id;
